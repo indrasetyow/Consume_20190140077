@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-signin-client_id" content="742200760484-cbfo6tm2deeuac4agu7mj3ndlpmuc38t.apps.googleusercontent.com">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+    <link href="index.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <title>Document</title>
+</head>
+
+<body>
+    
+
+
+    <div>
+        <nav class="navbar navbar-dark bg-dark">
+            <a class="navbar-brand" href="#">Selamat datang <br> Book List</a>
+            <button type="button" class="btn btn-secondary" onclick="showUserCreateBox()">Tambah Buku</button>
+            <button type="button" class="btn btn-secondary" onclick="sortTable()">Sort</button>
+
+        </nav>
+
+    </div>
+
+    <div class="container">
+        <input class="form-control" id="myInput" type="text" placeholder="Search..">
+        <div class="p-2 bd-highlight">
+        </div>
+    </div>
+    <div class="table-dark">
+
+        <table class="table table-dark">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">Id</th>
+                    <th scope="col">Nama Buku</th>
+                    <th scope="col">Kategori</th>
+                    <th scope="col">Penerbit</th>
+                    <th scope="col">Pengarang</th>
+                    <th scope="col">Harga</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody id="mytable">
+                <tr>
+                    <th scope="row" colspan="5">Loading</th>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    </div>
+
+
+    <script>
+        function sortTable() {
+  var table, rows, switching, i, x, y, shouldSwitch;
+  table = document.getElementById("mytable");
+  switching = true;
+  
+  while (switching) {
+    switching = false;
+    rows = table.rows;
+    for (i = 1; i < (rows.length - 1); i++) {
+      shouldSwitch = false;
+      x = rows[i].getElementsByTagName("td")[0];
+      y = rows[i + 1].getElementsByTagName("td")[0];
+      if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+        shouldSwitch = true;
+        break;
+      }
+    }
+    if (shouldSwitch) {
+      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+      switching = true;
+    }
+  }
+}
+
+        $(document).ready(function() {
+            $("#myInput").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $("#mytable tr").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+
+        function loadTable() {
+            const xhttp = new XMLHttpRequest();
+            xhttp.open("GET", "http://127.0.0.1:8080/book");
+            xhttp.send();
+            xhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    console.log(this.responseText);
+                    var trHtml = '';
+                    const objects = JSON.parse(this.responseText);
+                    for (let object of objects) {
+                        trHtml += '<tr>';
+                        trHtml += '<td>' + object['id'] + '</td>';
+                        trHtml += '<td>' + object['namaBuku'] + '</td>';
+                        trHtml += '<td>' + object['kategori'] + '</td>';
+                        trHtml += '<td>' + object['penerbit'] + '</td>';
+                        trHtml += '<td>' + object['pengarang'] + '</td>';
+                        trHtml += '<td>' + object['harga'] + '</td>';
+                        trHtml += '<td><button type="button" class="btn btn-outline-secondary" onclick = "showUserEditBox(' + object['id'] + ')">Edit</button></td>';
+                        trHtml += '<td><button type="button" class="btn btn-danger"onclick="userDelete(' + object['id'] + ')"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16"><path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5zm3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0z"></path></svg></button></td>';
+                        trHtml += '</tr>';
+                    }
+                    document.getElementById("mytable").innerHTML = trHtml;
+                }
+            };
+        }
+        loadTable();
+
+        function showUserCreateBox() {
+            Swal.fire({
+                title: 'Add Book',
+                html: '<input id="id" type="hidden">' +
+                    '<input id="namaBuku" class="swal2-input" placeholder="Judul Buku">' +
+                    '<input id="kategori" class="swal2-input" placeholder="Kategori Buku">' +
+                    '<input id="penerbit" class="swal2-input" placeholder="Penerbit">' +
+                    '<input id="pengarang" class="swal2-input" placeholder="Pengarang Buku">' +
+                    '<input id="harga" class="swal2-input" placeholder="Harga Buku">',
+                focusConfirm: false,
+                preConfirm: () => {
+                    userCreate();
+                }
+            })
+        }
+
+        function userCreate() {
+            const namaBuku = document.getElementById("namaBuku").value;
+            const kategori = document.getElementById("kategori").value;
+            const penerbit = document.getElementById("penerbit").value;
+            const pengarang = document.getElementById("pengarang").value;
+            const harga = document.getElementById("harga").value;
+
+            const xhttp = new XMLHttpRequest();
+            xhttp.open("POST", "http://127.0.0.1:8080/book");
+            xhttp.setRequestHeader("Content-Type", "application/json;");
+            xhttp.send(JSON.stringify({
+                "namaBuku": namaBuku,
+                "kategori": kategori,
+                "penerbit": penerbit,
+                "pengarang": pengarang,
+                "harga": harga
+            }));
+            xhttp.onreadystatechange = function() {
+                if (this.status == 200) {
+                    const objects = JSON.parse(this.responseText);
+                    Swal.fire(objects['message']);
+                    loadTable();
+                }
+            }
+        }
+
+        function showUserEditBox(id) {
+            console.log(id);
+            const xhttp = new XMLHttpRequest();
+            xhttp.open("GET", "http://127.0.0.1:8080/book/" + id);
+            xhttp.send();
+            xhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    const objects = JSON.parse(this.responseText);
+                    const user = objects["user"];
+                    console.log(user);
+                    Swal.fire({
+                        title: 'Edit Book',
+                        html: '<input id="id" type="hidden" value="' + objects['id'] + '">' +
+                            '<input id="namaBuku" class="swal2-input" placeholder="Judul Buku" value="' + objects['namaBuku'] + '">' +
+                            '<input id="kategori" class="swal2-input" placeholder="Kategori Buku" value="' + objects['kategori'] + '">' +
+                            '<input id="penerbit" class="swal2-input" placeholder="Penerbit" value="' + objects['penerbit'] + '">' +
+                            '<input id="pengarang" class="swal2-input" placeholder="Pengarang Buku" value="' + objects['pengarang'] + '">' +
+                            '<input id="harga" class="swal2-input" placeholder="Harga Buku" value="' + objects['harga'] + '">',
+                        focusConfirm: false,
+                        preConfirm: () => {
+                            userEdit();
+                        }
+                    })
+                }
+            };
+        }
+
+        function userEdit() {
+            const id = document.getElementById("id").value;
+            const namaBuku = document.getElementById("namaBuku").value;
+            const kategori = document.getElementById("kategori").value;
+            const penerbit = document.getElementById("penerbit").value;
+            const pengarang = document.getElementById("pengarang").value;
+            const harga = document.getElementById("harga").value;
+
+            const xhttp = new XMLHttpRequest();
+            xhttp.open("PUT", "http://127.0.0.1:8080/book/updateBook");
+            xhttp.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
+            xhttp.send(JSON.stringify({
+                "id": id,
+                "namaBuku": namaBuku,
+                "kategori": kategori,
+                "penerbit": penerbit,
+                "pengarang": pengarang,
+                "harga": harga
+            }));
+            xhttp.onreadystatechange = function() {
+                if (this.status == 200) {
+                    const objects = JSON.parse(this.responseText);
+                    Swal.fire(objects['message']);
+                    loadTable();
+                }
+            }
+        }
+
+
+        function userDelete(id) {
+
+            const xhttp = new XMLHttpRequest();
+            xhttp.open("DELETE", "http://127.0.0.1:8080/book/" + id);
+            xhttp.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
+            xhttp.send(JSON.stringify({
+                "id": id
+            }));
+            xhttp.onreadystatechange = function() {
+                var del = confirm("Are you sure you want to delete this record?");
+                if (del == true, this.status == 200) {
+
+                    const objects = JSON.parse(this.responseText);
+                    Swal.fire(objects["message"]);
+                    loadTable();
+
+                } else {
+                    return false;
+
+                }
+                document.getElementById("id").innerHTML = txt;
+
+
+            }
+        }
+    </script>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.0.16/dist/sweetalert2.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+</body>
+
+</html>
